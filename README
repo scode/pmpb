@@ -1,0 +1,99 @@
+pmpb = Poor Man's Package Builder
+=================================
+
+What it is
+----------
+
+A bunch of scripts that might make life easier building and upgrading
+FreeBSD ports. It is written for myself, not to be general. I just
+happen to feel that I might as well make them public.
+
+What it is not
+--------------
+
+It is NOT a package manager (my long term plans like with pkgmanager -
+http://www.scode.org/pkgmanager/ - but until nirvana this is what I
+use).
+
+It is NOT a proper generalized piece of software. There is no man
+page. There is no configuration file. There are various assumptions
+that happen to be correct for me, but may not be correct for you.
+
+Overview of usage
+-----------------
+
+The idea is to build binary packages from scratch in a dedicated
+package building jail, whose /etc/make.conf and
+/usr/local/etc/ports.conf is kept synched with intended desination
+installation hosts (along with the version of FreeBSD base).
+
+The actual upgrade procedure involves removing ALL installed packages,
+and re-installing from pre-built binary packages.
+
+The end-result is that an upgrade, for me, once set up, basically
+boils down to the following (DO NOT RUN THESE NOW, READ DETAILED
+INSTRUCTIONS BELOW):
+
+  - jail: portsnap update
+  - jail: ./clean.sh
+  - jail: ./build.sh all
+  - host: <rsync cmd censored for safety>
+  - host/other jails: ./clean.sh
+  - host/other jails: ./install.sh all
+
+More detailed instructions
+--------------------------
+
+WARNING: This is just a bunch of scripts. Things may blow up. For
+example, if you have the package database in non-typical location, or
+PREFIX is special, etc. I encourage reading all scripts FIRST.
+
+One-time or periodic setup:
+
+* You configure these scripts by modifying build.env.
+
+* You set up a jail dedicated to building packages.
+
+* You put a copy of this script in the host system and in the package
+  building jail. You also put a copy in any additional jails in which
+  you want stuff installed.
+
+* You maintain your ports tree IN THE PACKAGE BUILDING JAIL, using
+  portsnap or whatever method you choose.
+
+* Your environment, with respect to ports, is defined by /etc/make.conf
+  and /usr/local/etc/ports.conf (see ports-mgmt/portconf). If you have
+  configuration expressed in pkgtools config files or something else
+  - sorry.
+
+* You create one or more files called "packages.X", where "X" is the name
+  of the category of packages. The file is to contain one line of text per
+  package, with the name of the package.
+
+* You *must* have PACKAGES=/usr/ports/packages in /etc/make.conf.
+
+* It is recommended to have BATCH=1 in /etc/make.conf.
+
+* It is recommended to have FORCE_PACKAGE=1 in /etc/make.conf, since you're
+  presumably building for your own purposes and you want stuff like
+  screen (or licensingly bad stuff) built.
+
+Frequent building:
+
+* In the building jail: ./clean.sh to nuke all packages and the pkgtools
+  package database as well as pre-existing binary packages.
+
+* In the building jail: ./build.sh X (where X is the X from packages.X, signifying the category)
+
+* In the host: rsync --delete -avWP necessary files. This should be
+  /etc/make.conf, /usr/local/etc/ports.conf and all of
+  /usr/ports. These should be rsynced to your host and/or to jails. I
+  am not including a default script for this, because an rsync in
+  general, and an rsync --delete in particular, can be extremely
+  dangerous if incorrect.
+
+* In host/other jails: ./clean.sh to clean out all installed packages.
+
+* In host/other jails: ./install.sh X
+
+
