@@ -25,7 +25,7 @@ function buildpackage {
   else
 #    if ! (cd /usr/ports/$origin && make clean package-recursive)
     logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
-    log2 "building $origin"
+    log2 "building $origin and dependencies"
 
     if script -t 0 $logfile portinstall -pr $origin 1>/dev/null 2>/dev/null
     then
