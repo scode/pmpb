@@ -4,24 +4,34 @@ set -e
 
 source $(dirname $0)/build.env
 
+mkdir -p failed
+for f in $(ls failed/)
+do
+    rm failed/$f
+done
+
+
 pkgtype=$1
 
 function buildpackage {
   origin=$1
 
-  log "BUILD: processing $origin"
+  log "processing $origin"
   if packageisinstalled $origin
   then
-    log "BUILD: $pkg already installed - skipping"
+    log2 "$origin already installed - skipping"
   else
-    log "BUILD: building $pkg"
 #    if ! (cd /usr/ports/$origin && make clean package-recursive)
-    if ! (portinstall -pr $origin)
+    logfile="failed/$(echo $origin | sed -e s,/,_,g).log"
+    log2 "building $origin"
+
+    if script -t 0 $logfile portinstall -pr $origin 1>/dev/null 2>/dev/null
     then
-	log "BUILD: package $pkg from $origin failed"
-	echo "$origin" >> packages.failed
+	rm $logfile
+    else
+	log2 "BUILD:  package $origin failed to build - see $logfile"
+	(cd /usr/ports/$origin && make clean) || log2 "BUILD:  (cleaning of $origin failed)"
     fi
-    (cd /usr/ports/$origin && make clean) || log "BUILD: (cleaning of $origin failed)"
   fi
 }
 
