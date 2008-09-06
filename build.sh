@@ -31,8 +31,8 @@ function buildpackage {
     then
 	rm $logfile
     else
-	log2 "BUILD:  package $origin failed to build - see $logfile"
-	(cd /usr/ports/$origin && make clean) || log2 "BUILD:  (cleaning of $origin failed)"
+	log2 "package $origin failed to build - see $logfile"
+	(cd /usr/ports/$origin && make clean) || log2 "(cleaning of $origin failed)"
     fi
   fi
 }
