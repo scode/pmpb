@@ -4,10 +4,12 @@ set -e
 
 source $(dirname $0)/build.env
 
-mkdir -p failed
-for f in $(ls failed/)
+logdir="buildlog"
+
+mkdir -p $logdir
+for f in $(ls $logdir)
 do
-    rm failed/$f
+    rm $logdir/$f
 done
 
 
@@ -22,7 +24,7 @@ function buildpackage {
     log2 "$origin already installed - skipping"
   else
 #    if ! (cd /usr/ports/$origin && make clean package-recursive)
-    logfile="failed/$(echo $origin | sed -e s,/,_,g).log"
+    logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
     log2 "building $origin"
 
     if script -t 0 $logfile portinstall -pr $origin 1>/dev/null 2>/dev/null
