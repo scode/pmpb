@@ -70,7 +70,8 @@ One-time or periodic setup:
   of the category of packages. The file is to contain one line of text per
   package, with the name of the package.
 
-* You *must* have PACKAGES=/usr/ports/packages in /etc/make.conf.
+* You *must* have PACKAGES=/usr/ports/packages in /etc/make.conf, and
+  /usr/ports/packages must exist in the package building jail.
 
 * It is recommended to have BATCH=1 in /etc/make.conf.
 
