@@ -79,6 +79,10 @@ One-time or periodic setup:
   presumably building for your own purposes and you want stuff like
   screen (or licensingly bad stuff) built.
 
+* PACKAGE_BUILDING=1 is also recommended (e.g. java/jdk16 then won't wait
+  forever on some interactive input which it does otherwise, regardless of
+  BATCH=1)
+
 Frequent building:
 
 * In the building jail: ./clean.sh to nuke all packages and the pkgtools
