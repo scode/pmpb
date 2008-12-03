@@ -5,6 +5,7 @@ set -e
 source $(dirname $0)/build.env
 
 logdir="buildlog"
+portsroot=/usr/ports
 
 mkdir -p $logdir
 for f in $(ls $logdir)
@@ -15,6 +16,69 @@ done
 
 pkgtype=$1
 
+function buildorigin {
+  origin=$1
+
+  logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
+
+  log3 " building $origin"
+  if (cd $portsroot/$origin && make package clean 2>&1) >> $logfile
+  then
+      log3 "package $origin failed - see $logfile"
+  else
+      rm $logfile
+  fi
+}
+
+function originfailed {
+    origin=$1
+
+    if [ -e "$logdir/$(echo $origin | sed -e s,/,_,g).log" ]
+    then
+	return 0
+    else
+	return 1
+    fi
+}
+
+function buildrecursively {
+  origin=$1
+  level=$2
+
+  if [ "$level" -gt "20" ]
+  then
+      log "ERROR: recursion level exceeds 20 (cyclic dependencies?) - bailing; let's not fork bomb the machine"
+      exit 1
+  fi
+
+  for dep in $(cd $portsroot/$origin && make all-depends-list | sed -e "s,$portsroot/,,g")
+  do
+    log3 "$origin depends on $dep"
+    failed="false"
+    if ! packageisinstalled $dep
+    then
+      if originfailed $dep
+      then
+	log3 "dependency $origin seems to have failed a previous build attempt - skipping"
+	failed="true"
+      else
+	buildrecursively $dep $(($level + 1))
+	if originfailed $dep
+	then
+	  failed="true"
+	fi
+      fi
+    fi
+    
+    if [ "$failed" = "false" ]
+    then
+      buildorigin $origin
+    else
+      log3 "not building $origin due to failed dependencies"
+    fi
+  done
+}
+
 function buildpackage {
   origin=$1
 
@@ -23,6 +87,8 @@ function buildpackage {
   then
     log2 "$origin already installed - skipping"
   else
+    builddeps $origin
+
 #    if ! (cd /usr/ports/$origin && make clean package-recursive)
     logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
     log2 "building $origin and dependencies"
@@ -37,10 +103,11 @@ function buildpackage {
   fi
 }
 
-for package in $(cat packages.${pkgtype})
+for origin in $(cat packages.${pkgtype})
 do
 
-  buildpackage $package
+  #buildpackage $package
+  buildrecursively $origin 0
 
 done
 
