@@ -106,8 +106,8 @@ function buildpackage {
 for origin in $(cat packages.${pkgtype})
 do
 
-  #buildpackage $package
-  buildrecursively $origin 0
+  buildpackage $origin
+  #buildrecursively $origin 0
 
 done
 
