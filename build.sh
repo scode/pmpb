@@ -41,7 +41,7 @@ function build {
       rm $logfile
   fi
 
-  log3 ! "packaging $origin"
+  log3 "packaging $origin"
   if ! (cd $portsroot/$origin && make package 2>&1) >> $logfile
   then
       log3 "package $origin failed package step - see $logfile"
