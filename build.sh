@@ -33,12 +33,7 @@ function buildorigin {
 function originfailed {
     origin=$1
 
-    if [ -e "$logdir/$(echo $origin | sed -e s,/,_,g).log" ]
-    then
-	return 0
-    else
-	return 1
-    fi
+    [ -e "$logdir/$(echo $origin | sed -e s,/,_,g).log" ]
 }
 
 function buildrecursively {
@@ -73,7 +68,12 @@ function buildrecursively {
     
     if [ "$failed" = "false" ]
     then
-      (buildorigin $origin)
+      if (originfailed $origin)
+      then
+	log3 "not building $origin because it has already been attempted and failed"
+      else
+	(buildorigin $origin)
+      fi
     else
       log3 "not building $origin due to failed dependencies"
     fi
