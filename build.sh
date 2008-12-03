@@ -19,7 +19,7 @@ pkgtype=$1
 function build {
   origin=$1
 
-  log2 "building $origin"
+  log2 "preparing $origin"
 
   logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
 
