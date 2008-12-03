@@ -55,16 +55,17 @@ function buildrecursively {
   do
     log3 "$origin depends on $dep"
     failed="false"
-    if ! packageisinstalled $dep
+    if ! (packageisinstalled $dep)
     then
-      if originfailed $dep
+      if (originfailed $dep)
       then
 	log3 "dependency $origin seems to have failed a previous build attempt - skipping"
 	failed="true"
       else
-	buildrecursively $dep $(($level + 1))
-	if originfailed $dep
+	(buildrecursively $dep $(($level + 1)))
+	if (originfailed $dep)
 	then
+	  log3 "dependency $origin failed to build - skipping"
 	  failed="true"
 	fi
       fi
@@ -72,7 +73,7 @@ function buildrecursively {
     
     if [ "$failed" = "false" ]
     then
-      buildorigin $origin
+      (buildorigin $origin)
     else
       log3 "not building $origin due to failed dependencies"
     fi
@@ -106,8 +107,8 @@ function buildpackage {
 for origin in $(cat packages.${pkgtype})
 do
 
-  buildpackage $origin
-  #buildrecursively $origin 0
+  #buildpackage $origin
+  buildrecursively $origin 0
 
 done
 
