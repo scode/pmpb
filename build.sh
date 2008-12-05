@@ -17,11 +17,14 @@ done
 pkgtype=$1
 
 function build {
-  origin=$1
+  local origin=$1
 
   log2 "preparing $origin"
 
   logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
+
+  log3 "pre-cleaning $origin"
+  (cd $portsroot/$origin && make clean) >> /dev/null
 
   log3 "building $origin"
   if ! (cd $portsroot/$origin && make build 2>&1) >> $logfile
@@ -29,7 +32,7 @@ function build {
       log3 "package $origin failed build step - see $logfile"
       return
   else
-      rm $logfile
+      #rm $logfile
   fi
 
   log3 "installing $origin"
@@ -38,7 +41,7 @@ function build {
       log3 "package $origin failed install step - see $logfile"
       return
   else
-      rm $logfile
+      #rm $logfile
   fi
 
   log3 "packaging $origin"
@@ -47,7 +50,7 @@ function build {
       log3 "package $origin failed package step - see $logfile"
       return
   else
-      rm $logfile
+      #rm $logfile
   fi
 
   log3 "cleaning $origin"
@@ -64,17 +67,21 @@ function build {
   #fi
 }
 
-function originfailed {
-    origin=$1
+function originlog {
+    echo "$logdir/$(echo $origin | sed -e s,/,_,g).log"
+}
 
-    [ -e "$logdir/$(echo $origin | sed -e s,/,_,g).log" ]
+function originfailed {
+    local origin=$1
+    
+    [ -e "$(originlog $origin)" ]
 }
 
 function buildrecursively {
-  origin=$1
-  level=$2
+  local origin=$1
+  local level=$2
 
-  log "processing $origin"
+  log "processing $origin (pkgname: $(packagename $origin))"
 
   if [ "$level" -gt "20" ]
   then
@@ -85,17 +92,17 @@ function buildrecursively {
   for dep in $(cd $portsroot/$origin && make all-depends-list | sed -e "s,$portsroot/,,g")
   do
     failed="false"
-    if ! (packageisinstalled $dep)
+    if ! packageisinstalled $dep
     then
       log3 "$origin depends on $dep which is not installed"
 
-      if (originfailed $dep)
+      if originfailed $dep
       then
-	log3 "dependency $origin seems to have failed a previous build attempt - skipping"
+	log3 "dependency $dep seems to have failed a previous build attempt - skipping"
 	failed="true"
       else
-	(buildrecursively $dep $(($level + 1)))
-	if (originfailed $dep)
+	buildrecursively $dep $(($level + 1))
+	if originfailed $dep
 	then
 	  log3 "dependency $origin failed to build - skipping"
 	  failed="true"
@@ -106,26 +113,27 @@ function buildrecursively {
     fi
   done
 
-  if (packageisinstalled $origin)
+  if packageisinstalled $origin
   then
     log3 "$origin is already installed"
   else
     if [ "$failed" = "false" ]
     then
-      if (originfailed $origin)
+      if originfailed $origin
       then
         log3 "not building $origin because it has already been attempted and failed"
       else
-        (build $origin)
+        build $origin
       fi
     else
       log3 "not building $origin due to failed dependencies"
+      echo "building of this origin was not attempted due to failed dependencies" >> $(originlog $origin)
     fi
   fi
 }
 
 function buildpackage {
-  origin=$1
+  local origin=$1
 
   log "processing $origin"
   if packageisinstalled $origin
