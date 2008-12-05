@@ -32,7 +32,7 @@ function build {
       log3 "package $origin failed build step - see $logfile"
       return
   else
-      #rm $logfile
+      rm $logfile
   fi
 
   log3 "installing $origin"
@@ -41,7 +41,7 @@ function build {
       log3 "package $origin failed install step - see $logfile"
       return
   else
-      #rm $logfile
+      rm $logfile
   fi
 
   log3 "packaging $origin"
@@ -50,7 +50,7 @@ function build {
       log3 "package $origin failed package step - see $logfile"
       return
   else
-      #rm $logfile
+      rm $logfile
   fi
 
   log3 "cleaning $origin"
