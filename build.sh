@@ -21,7 +21,7 @@ function build {
 
   log2 "preparing $origin"
 
-  logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
+  local logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
 
   log3 "pre-cleaning $origin"
   (cd $portsroot/$origin && make clean) >> /dev/null
@@ -145,7 +145,7 @@ function buildpackage {
     builddeps $origin
 
 #    if ! (cd /usr/ports/$origin && make clean package-recursive)
-    logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
+    local logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
     log2 "building $origin and dependencies"
 
     if script -t 0 $logfile portinstall -pr $origin 1>/dev/null 2>/dev/null
