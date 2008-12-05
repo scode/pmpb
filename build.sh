@@ -89,19 +89,21 @@ function buildrecursively {
       exit 1
   fi
 
+  local failed="false"
+  local dep
   for dep in $(cd $portsroot/$origin && make all-depends-list | sed -e "s,$portsroot/,,g")
   do
-    failed="false"
     if ! packageisinstalled $dep
     then
       log3 "$origin depends on $dep which is not installed"
-
+      
       if originfailed $dep
       then
 	log3 "dependency $dep seems to have failed a previous build attempt - skipping"
 	failed="true"
       else
 	buildrecursively $dep $(($level + 1))
+	log3 "DEP ATER REC: $dep"
 	if originfailed $dep
 	then
 	  log3 "dependency $origin failed to build - skipping"
