@@ -21,10 +21,10 @@ function build {
 
   log2 "preparing $origin"
 
-  local logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
+  local logfile="$(originlog $origin)"
 
   log3 "pre-cleaning $origin"
-  (cd $portsroot/$origin && make clean) >> /dev/null
+  (cd $portsroot/$origin && make clean) >> /dev/null || log3 'pre-cleaning failed - ignoring that'
 
   log3 "building $origin"
   if ! (cd $portsroot/$origin && make build 2>&1) >> $logfile
@@ -56,7 +56,7 @@ function build {
   log3 "cleaning $origin"
   # this seems to return non-successfully often for some reason; without
   # any actual error
-  (cd $portsroot/$origin && make clean) >> /dev/null
+  (cd $portsroot/$origin && make clean) >> /dev/null || log3 "cleaning failed - ignoring that"
 
   #if (cd $portsroot/$origin && make clean 2>&1) >> $logfile
   #then
@@ -103,10 +103,9 @@ function buildrecursively {
 	failed="true"
       else
 	buildrecursively $dep $(($level + 1))
-	log3 "DEP ATER REC: $dep"
 	if originfailed $dep
 	then
-	  log3 "dependency $origin failed to build - skipping"
+	  log3 "dependency $dep failed to build - skipping"
 	  failed="true"
 	fi
       fi
@@ -145,7 +144,7 @@ function buildpackage {
     builddeps $origin
 
 #    if ! (cd /usr/ports/$origin && make clean package-recursive)
-    local logfile="$logdir/$(echo $origin | sed -e s,/,_,g).log"
+    local logfile="$(originlog $origin)"
     log2 "building $origin and dependencies"
 
     if script -t 0 $logfile portinstall -pr $origin 1>/dev/null 2>/dev/null
@@ -158,11 +157,12 @@ function buildpackage {
   fi
 }
 
+local origin
 for origin in $(cat packages.${pkgtype})
 do
 
   #buildpackage $origin
-  buildrecursively $origin 0
+  buildrecursively $origin 0 || log "$origin failed - continuing with next item"
 
 done
 
