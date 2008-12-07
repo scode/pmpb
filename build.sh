@@ -83,6 +83,12 @@ function buildrecursively {
 
   log "processing $origin (pkgname: $(packagename $origin))"
 
+  if packageisinstalled $origin
+  then
+    log3 "$origin is already installed"
+    return
+  fi
+
   if [ "$level" -gt "20" ]
   then
       log "ERROR: recursion level exceeds 20 (cyclic dependencies?) - bailing; let's not fork bomb the machine"
