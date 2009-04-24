@@ -1,0 +1,8 @@
+* build-deps aren't installed on target host unless they are also
+  run-deps
+* build env. not normalized w.r.t. other parts of dep tree such that
+  dependency choices that are a function of installed packages are
+  non-detemrinistic (IMO broken behavior in ports but I don't think
+  ports people agree). this means, for example, that a package might first
+  fail due to a conflict, but succeed on re-try because of different choice
+  of dependency resulting from another unrelated package being installed
