@@ -166,6 +166,14 @@ function buildpackage {
 local origin
 for origin in $(cat packages.${pkgtype})
 do
+  if ! originexists $origin
+  then
+    die "$origin does not exist or has no Makefile - adjust package list?"
+  fi
+done
+
+for origin in $(cat packages.${pkgtype})
+do
 
   #buildpackage $origin
   buildrecursively $origin 0 || log "$origin failed - continuing with next item"
