@@ -82,7 +82,7 @@ One-time or periodic setup:
 * PACKAGE_BUILDING=1 is also recommended (e.g. java/jdk16 then won't wait
   forever on some interactive input which it does otherwise, regardless of
   BATCH=1). However, this also disables ports-mgmt/portconf's addition
-  to /etc/make.conf (but NOT the reoval!) so you will want to maintain
+  to /etc/make.conf (but NOT the removal!) so you will want to maintain
   the appropriate content there manually if you use portconf.
 
 Frequent building:
