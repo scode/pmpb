@@ -6,7 +6,7 @@ set -e
 # twist over *something* in between upgrades. Totally nuking the
 # database tends to translate into successful operation.
 
-BATCH=1 pkg_delete -a -a
+BATCH=1 pkg_delete -a -f
 rm -rf /usr/ports/packages/All
 rm /var/db/pkg/pkgdb.db
 
