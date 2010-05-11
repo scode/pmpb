@@ -12,7 +12,7 @@ function instpack {
 	echo "******** Installing $package and dependencies... ********"
 	ensurepackageinstalled $package
     else
-	echo "******** Packag $package is already installed    ********"
+	echo "******** Package $package is already installed    ********"
     fi
 }
 
