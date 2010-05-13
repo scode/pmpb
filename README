@@ -79,11 +79,18 @@ One-time or periodic setup:
   presumably building for your own purposes and you want stuff like
   screen (or licensingly bad stuff) built.
 
-* PACKAGE_BUILDING=1 is also recommended (e.g. java/jdk16 then won't wait
-  forever on some interactive input which it does otherwise, regardless of
-  BATCH=1). However, this also disables ports-mgmt/portconf's addition
-  to /etc/make.conf (but NOT the removal!) so you will want to maintain
-  the appropriate content there manually if you use portconf.
+* PACKAGE_BUILDING=1 may be considered. For example, it stops
+  java/jdk16 from prompting interactively for a license acceptace
+  (even though you have BATCH set). On the other hand:
+
+    - It also disables ports-mgmt/portconf's addition
+      to /etc/make.conf (but NOT the removal!) so you will want to maintain
+      the appropriate content there manually if you use portconf.
+    - It makes mutt depend on firefox indirectly...
+    - It is probably incorrect, since my best understanding is that this is
+      only supposed to be used for official freebsd package builds and who knows
+      what decisions are made as a result of that (the mutt -> urlview -> firefox
+      dependency thing was just the first thing I happened to notice).
 
 Frequent building:
 
